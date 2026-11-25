@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>萬聖節派對大冒險｜國中七年級 Lesson 3 單字闖關</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top HUD -->
+    <header id="hud" class="hidden">
+      <div class="hud-left">
+        <button id="btn-menu" class="pixel-btn small" title="回主選單">🏠 選單</button>
+        <span id="hud-stage" class="hud-badge">第一關</span>
+      </div>
+      <div class="hud-center">
+        <div id="hud-hearts" class="hearts" aria-label="愛心">❤️❤️❤️❤️❤️</div>
+        <div class="hud-stat">關卡門：<span id="hud-progress">0/13</span></div>
+        <div class="hud-stat">分數：<span id="hud-score">0</span></div>
+        <div class="hud-stat combo">連擊：<span id="hud-combo">0</span>x</div>
+      </div>
+      <div class="hud-right">
+        <button id="btn-mute" class="pixel-btn small" title="音效開關">🔊 音效</button>
+      </div>
+    </header>
+
+    <!-- Main Game Canvas -->
+    <main id="game-wrapper">
+      <canvas id="game-canvas" width="960" height="540"></canvas>
+
+      <!-- Start / Stage Select Overlay -->
+      <section id="screen-menu" class="overlay">
+        <div class="pixel-panel menu-panel">
+          <div class="title-tag">國中七年級英語 Lesson 3</div>
+          <h1>🎃 萬聖節派對大冒險 🍜</h1>
+          <p class="subtitle">2D 橫向像素闖關 × 35 個核心單字 ＋ 1 句慣用語</p>
+
+          <div class="stage-grid" id="stage-cards"></div>
+
+          <div class="menu-actions">
+            <button id="btn-flashcards" class="pixel-btn secondary">📖 單字預習表（全部 36 題）</button>
+          </div>
+
+          <div class="controls-hint">
+            <span>⌨️ 鍵盤操作：<b>← →</b> 或 <b>A D</b> 移動 ｜ <b>空白鍵 / ↑ / W</b> 跳躍</span>
+            <span>📱 平板/手機：畫面下方提供虛擬按鍵</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Flashcard Preview Overlay -->
+      <section id="screen-flashcards" class="overlay hidden">
+        <div class="pixel-panel flashcard-panel">
+          <div class="panel-header">
+            <h2>📖 Lesson 3 單字預習表</h2>
+            <button id="btn-close-flashcards" class="pixel-btn small">✖ 關閉</button>
+          </div>
+          <div id="flashcard-list" class="flashcard-list"></div>
+        </div>
+      </section>
+
+      <!-- Quiz Modal -->
+      <section id="modal-quiz" class="overlay hidden">
+        <div class="pixel-panel quiz-panel">
+          <div class="quiz-header">
+            <span id="quiz-type-badge" class="quiz-badge">看英文選中文</span>
+            <span id="quiz-word-num" class="quiz-num">#1</span>
+          </div>
+
+          <div class="quiz-prompt-box">
+            <div id="quiz-prompt" class="quiz-prompt">delicious</div>
+            <div id="quiz-subprompt" class="quiz-subprompt">[dɪ`lɪʃəs] adj.</div>
+            <button id="btn-speak-prompt" class="pixel-btn small speak-btn">🔊 聽發音</button>
+          </div>
+
+          <div id="quiz-options" class="quiz-options"></div>
+
+          <!-- Feedback Area -->
+          <div id="quiz-feedback" class="quiz-feedback hidden">
+            <div id="feedback-status" class="feedback-status"></div>
+            <div id="feedback-detail" class="feedback-detail"></div>
+            <div class="feedback-actions">
+              <button id="btn-speak-sentence" class="pixel-btn small">🔊 聽例句</button>
+              <button id="btn-quiz-continue" class="pixel-btn primary">繼續前進 ➔</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stage Clear Modal -->
+      <section id="modal-clear" class="overlay hidden">
+        <div class="pixel-panel clear-panel">
+          <h2>🎉 關卡完成！</h2>
+          <div id="clear-stars" class="stars">⭐⭐⭐</div>
+          <div class="clear-stats">
+            <div>本關分數：<b id="clear-score">0</b></div>
+            <div>答題正確率：<b id="clear-accuracy">100%</b></div>
+          </div>
+
+          <div id="clear-mistakes-box" class="mistakes-box">
+            <h3>📝 本關錯題複習</h3>
+            <div id="clear-mistakes-list" class="mistakes-list"></div>
+          </div>
+
+          <div class="clear-actions">
+            <button id="btn-replay" class="pixel-btn secondary">🔄 重玩本關</button>
+            <button id="btn-next-stage" class="pixel-btn primary">下一關 ➔</button>
+            <button id="btn-clear-menu" class="pixel-btn">🏠 回主選單</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toast Message -->
+      <div id="toast" class="toast hidden"></div>
+    </main>
+
+    <!-- Touch Controls for Tablet / Mobile -->
+    <div id="touch-controls" class="touch-controls hidden">
+      <div class="touch-left">
+        <button id="touch-left" class="touch-btn">◀</button>
+        <button id="touch-right" class="touch-btn">▶</button>
+      </div>
+      <div class="touch-right">
+        <button id="touch-jump" class="touch-btn jump">JUMP ▲</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/vocab.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
