@@ -179,6 +179,39 @@ window.PixelSprites = {
     }
   },
 
+  // Airborne Flying Enemy (flapping wings)
+  drawFlyingEnemy(ctx, x, y, theme, frame, facingRight) {
+    const scale = 3; // 12x8 -> 36x24
+    const palette =
+      theme === "kitchen"
+        ? { W: "#fef08a", B: "#ef4444", E: "#ffffff", K: "#111827" } // Flying Hot Wing / Pepper
+        : theme === "castle"
+        ? { W: "#e2e8f0", B: "#7c3aed", E: "#fde047", K: "#0f172a" } // Flying Imp
+        : { W: "#a855f7", B: "#1e1b4b", E: "#ef4444", K: "#f8fafc" }; // Halloween Bat
+
+    const flapUp = [
+      "WW........WW",
+      "WWW..BB..WWW",
+      ".WWBBBBBBWW.",
+      "..BBKEKBBK..",
+      "..BBBBBBBB..",
+      "...BBBBBB...",
+      "....B..B....",
+      "............"
+    ];
+    const flapDown = [
+      "............",
+      ".....BB.....",
+      "...BBBBBB...",
+      "..BBKEKBBK..",
+      ".WWBBBBBBWW.",
+      "WWW.BBBB.WWW",
+      "WW...BB...WW",
+      "............"
+    ];
+    this.drawGrid(ctx, x, y, scale, frame % 2 === 0 ? flapUp : flapDown, palette, !facingRight);
+  },
+
   // Word Gate / Question Block
   drawGate(ctx, x, y, w, h, solved, wordNum, pulse) {
     ctx.save();

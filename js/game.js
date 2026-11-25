@@ -148,7 +148,7 @@
     gates = [];
     particles = [];
 
-    const segmentWidth = 340;
+    const segmentWidth = 440;
     const totalWords = stage.words.length;
     worldWidth = 260 + totalWords * segmentWidth + 280;
 
@@ -156,39 +156,172 @@
     platforms.push({ x: 0, y: GROUND_Y, w: worldWidth, h: H - GROUND_Y, type: "ground" });
 
     stage.words.forEach((wordObj, i) => {
-      const baseX = 240 + i * segmentWidth;
+      const baseX = 220 + i * segmentWidth;
+      const pattern = i % 3;
 
-      // Platforming step before the gate
-      const platY = i % 2 === 0 ? GROUND_Y - 95 : GROUND_Y - 125;
-      const platX = baseX + 30;
-      platforms.push({ x: platX, y: platY, w: 120, h: 20, type: "brick" });
+      if (pattern === 0) {
+        // Pattern 0: Ground Gate + High Bonus Sky Route + Flying Enemy
+        const p1Y = GROUND_Y - 90;
+        const p2Y = GROUND_Y - 165;
+        platforms.push({ x: baseX + 20, y: p1Y, w: 100, h: 20, type: "brick" });
+        platforms.push({ x: baseX + 145, y: p2Y, w: 110, h: 20, type: "brick" });
 
-      // Coins on platform
-      coins.push({ x: platX + 20, y: platY - 32, collected: false });
-      coins.push({ x: platX + 75, y: platY - 32, collected: false });
+        coins.push({ x: baseX + 55, y: p1Y - 32, collected: false });
+        coins.push({ x: baseX + 170, y: p2Y - 32, collected: false });
+        coins.push({ x: baseX + 210, y: p2Y - 32, collected: false });
 
-      // Patrolling enemy between gates
-      enemies.push({
-        x: baseX + 55,
-        y: GROUND_Y - 30,
-        w: 30,
-        h: 30,
-        minX: baseX + 10,
-        maxX: baseX + 165,
-        vx: (i % 2 === 0 ? 1 : -1) * (70 + currentStageIndex * 15),
-        frame: 0,
-        frameTimer: 0
-      });
+        // Ground enemy
+        enemies.push({
+          type: "ground",
+          x: baseX + 60,
+          y: GROUND_Y - 30,
+          w: 30,
+          h: 30,
+          minX: baseX + 10,
+          maxX: baseX + 240,
+          vx: (i % 2 === 0 ? 1 : -1) * (80 + currentStageIndex * 15),
+          frame: 0,
+          frameTimer: 0
+        });
 
-      // Word Gate blocking passage until solved
-      gates.push({
-        x: baseX + 220,
-        y: GROUND_Y - 96,
-        w: 48,
-        h: 96,
-        wordObj,
-        solved: false
-      });
+        // Flying enemy patrolling mid-air
+        enemies.push({
+          type: "flying",
+          x: baseX + 120,
+          y: GROUND_Y - 135,
+          baseY: GROUND_Y - 135,
+          w: 36,
+          h: 24,
+          minX: baseX + 40,
+          maxX: baseX + 270,
+          vx: 85 + currentStageIndex * 15,
+          bobPhase: i * 1.1,
+          frame: 0,
+          frameTimer: 0
+        });
+
+        gates.push({
+          x: baseX + 310,
+          y: GROUND_Y - 96,
+          w: 48,
+          h: 96,
+          wordObj,
+          solved: false
+        });
+      } else if (pattern === 1) {
+        // Pattern 1: 2-Step Mid-Air Gate with Moving Platform
+        const p1Y = GROUND_Y - 85;
+        const p2Y = GROUND_Y - 165;
+        platforms.push({ x: baseX + 15, y: p1Y, w: 95, h: 20, type: "brick" });
+        platforms.push({
+          x: baseX + 140,
+          y: p2Y,
+          w: 95,
+          h: 20,
+          type: "moving",
+          minX: baseX + 120,
+          maxX: baseX + 255,
+          vx: 70 + currentStageIndex * 12,
+          dx: 0
+        });
+        platforms.push({ x: baseX + 280, y: p2Y, w: 110, h: 20, type: "brick" });
+
+        coins.push({ x: baseX + 52, y: p1Y - 32, collected: false });
+        coins.push({ x: baseX + 175, y: p2Y - 32, collected: false });
+
+        // Ground enemy below
+        enemies.push({
+          type: "ground",
+          x: baseX + 90,
+          y: GROUND_Y - 30,
+          w: 30,
+          h: 30,
+          minX: baseX + 20,
+          maxX: baseX + 320,
+          vx: -85 - currentStageIndex * 15,
+          frame: 0,
+          frameTimer: 0
+        });
+
+        // Flying enemy guarding the aerial jump
+        enemies.push({
+          type: "flying",
+          x: baseX + 200,
+          y: p2Y - 48,
+          baseY: p2Y - 48,
+          w: 36,
+          h: 24,
+          minX: baseX + 100,
+          maxX: baseX + 300,
+          vx: -90 - currentStageIndex * 15,
+          bobPhase: i * 0.9,
+          frame: 0,
+          frameTimer: 0
+        });
+
+        // Mid-Air Word Gate
+        gates.push({
+          x: baseX + 312,
+          y: p2Y - 96,
+          w: 48,
+          h: 96,
+          wordObj,
+          solved: false
+        });
+      } else {
+        // Pattern 2: 3-Step High Sky Staircase (連續踩踏才能觸發)
+        const y1 = GROUND_Y - 80;
+        const y2 = GROUND_Y - 155;
+        const y3 = GROUND_Y - 230;
+        platforms.push({ x: baseX + 10, y: y1, w: 85, h: 20, type: "brick" });
+        platforms.push({ x: baseX + 115, y: y2, w: 85, h: 20, type: "brick" });
+        platforms.push({ x: baseX + 220, y: y3, w: 85, h: 20, type: "brick" });
+        platforms.push({ x: baseX + 325, y: y3, w: 95, h: 20, type: "brick" });
+
+        coins.push({ x: baseX + 42, y: y1 - 32, collected: false });
+        coins.push({ x: baseX + 147, y: y2 - 32, collected: false });
+        coins.push({ x: baseX + 252, y: y3 - 32, collected: false });
+
+        // Two flying enemies at different heights
+        enemies.push({
+          type: "flying",
+          x: baseX + 140,
+          y: y2 - 42,
+          baseY: y2 - 42,
+          w: 36,
+          h: 24,
+          minX: baseX + 60,
+          maxX: baseX + 260,
+          vx: 95 + currentStageIndex * 15,
+          bobPhase: i * 0.7,
+          frame: 0,
+          frameTimer: 0
+        });
+        enemies.push({
+          type: "flying",
+          x: baseX + 280,
+          y: y3 - 45,
+          baseY: y3 - 45,
+          w: 36,
+          h: 24,
+          minX: baseX + 180,
+          maxX: baseX + 360,
+          vx: -85 - currentStageIndex * 12,
+          bobPhase: i * 1.5,
+          frame: 0,
+          frameTimer: 0
+        });
+
+        // High Sky Word Gate
+        gates.push({
+          x: baseX + 348,
+          y: y3 - 96,
+          w: 48,
+          h: 96,
+          wordObj,
+          solved: false
+        });
+      }
     });
 
     goal = {
@@ -375,7 +508,7 @@
     activeGate.solved = true;
     spawnParticles(activeGate.x + activeGate.w / 2, activeGate.y + 40, "#4ade80", 16);
     player.safeX = activeGate.x + activeGate.w + 10;
-    player.safeY = GROUND_Y - player.h;
+    player.safeY = activeGate.y + activeGate.h - player.h;
     activeGate = null;
     modalQuiz.classList.add("hidden");
     state = "playing";
@@ -445,6 +578,22 @@
     pulseTime += dt;
     if (state !== "playing") return;
 
+    // Update moving platforms first
+    for (const plat of platforms) {
+      if (plat.type === "moving") {
+        const oldX = plat.x;
+        plat.x += plat.vx * dt;
+        if (plat.x <= plat.minX) {
+          plat.x = plat.minX;
+          plat.vx = Math.abs(plat.vx);
+        } else if (plat.x + plat.w >= plat.maxX) {
+          plat.x = plat.maxX - plat.w;
+          plat.vx = -Math.abs(plat.vx);
+        }
+        plat.dx = plat.x - oldX;
+      }
+    }
+
     // Horizontal movement
     if (keys.left && !keys.right) {
       player.vx = -MOVE_SPEED;
@@ -488,11 +637,18 @@
 
     for (const plat of platforms) {
       if (overlaps(player, plat)) {
-        if (player.vy > 0 && player.y + player.h - player.vy * dt <= plat.y + 10) {
+        if (player.vy > 0 && player.y + player.h - player.vy * dt <= plat.y + 12) {
           player.y = plat.y - player.h;
           player.vy = 0;
           player.onGround = true;
-        } else if (player.vy < 0 && plat.type === "brick" && player.y - player.vy * dt >= plat.y + plat.h - 10) {
+          if (plat.type === "moving" && plat.dx) {
+            player.x += plat.dx;
+          }
+        } else if (
+          player.vy < 0 &&
+          (plat.type === "brick" || plat.type === "moving") &&
+          player.y - player.vy * dt >= plat.y + plat.h - 10
+        ) {
           player.y = plat.y + plat.h;
           player.vy = 0;
         }
@@ -535,8 +691,11 @@
         en.x = en.maxX - en.w;
         en.vx = -Math.abs(en.vx);
       }
+      if (en.type === "flying") {
+        en.y = en.baseY + Math.sin(pulseTime * 3.5 + en.bobPhase) * 14;
+      }
       en.frameTimer += dt;
-      if (en.frameTimer > 0.22) {
+      if (en.frameTimer > 0.18) {
         en.frameTimer = 0;
         en.frame = (en.frame + 1) % 2;
       }
@@ -610,6 +769,12 @@
         ctx.fillRect(plat.x, plat.y, plat.w, 14);
         ctx.fillStyle = theme === "kitchen" ? "#92400e" : theme === "castle" ? "#475569" : "#3b0764";
         ctx.fillRect(plat.x, plat.y + 14, plat.w, plat.h - 14);
+      } else if (plat.type === "moving") {
+        ctx.fillStyle = "#0284c7";
+        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+        ctx.strokeStyle = "#7dd3fc";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(plat.x + 1, plat.y + 1, plat.w - 2, plat.h - 2);
       } else {
         ctx.fillStyle = "#b45309";
         ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
@@ -638,7 +803,11 @@
 
     // Enemies
     for (const en of enemies) {
-      window.PixelSprites.drawEnemy(ctx, en.x, en.y, theme, en.frame, en.vx > 0);
+      if (en.type === "flying") {
+        window.PixelSprites.drawFlyingEnemy(ctx, en.x, en.y, theme, en.frame, en.vx > 0);
+      } else {
+        window.PixelSprites.drawEnemy(ctx, en.x, en.y, theme, en.frame, en.vx > 0);
+      }
     }
 
     // Player
